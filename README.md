@@ -9,10 +9,10 @@ The platform will feature categorized questions, personalized content via a "For
 
 ## Project Components
 
-* ER: [Requirements Specification](https://gitlab.up.pt/lbaw/lbaw2425/lbaw24042/-/wikis/Requirements-Engineering)
-* EBD: [Database Specification](https://gitlab.up.pt/lbaw/lbaw2425/lbaw24042/-/wikis/Database-Specification-Component)
-* EAP: [Architecture Specification and Prototype](https://gitlab.up.pt/lbaw/lbaw2425/lbaw24042/-/wikis/Architecture-Specification-and-Prototype)
-* PA: [Product and Presentation](https://gitlab.up.pt/lbaw/lbaw2425/lbaw24042/-/wikis/Product-and-Presentation)
+* ER: [Requirements Specification](https://github.com/jgmesquita/askFEUP/blob/master/ER.pdf)
+* EBD: [Database Specification](https://github.com/jgmesquita/askFEUP/blob/master/EBD.pdf)
+* EAP: [Architecture Specification and Prototype](https://github.com/jgmesquita/askFEUP/blob/master/EAP.pdf)
+* PA: [Product and Presentation](https://github.com/jgmesquita/askFEUP/blob/master/PA.pdf)
 
 
 ## Artefacts Checklist
