@@ -1,0 +1,1118 @@
+openapi: 3.0.0
+
+info:
+  version: '1.0'
+  title: 'askFEUP API'
+  description: 'Web Resources Specification (A7) for askFEUP'
+
+servers:
+- url: http://lbaw.fe.up.pt
+  description: Production server
+
+tags:
+ - name: 'M01: Authentication'
+ - name: 'M02: Users'
+ - name: 'M03: Posts' 
+ - name: 'M04: Administration'
+
+paths:
+
+### M01 Authentication ###
+  /login:
+    get:
+      operationId: R101
+      summary: 'R101: Login Form'
+      description: 'Provide login form. Access: GST'
+      tags:
+        - 'M01: Authentication'
+      responses:
+        '200':
+          description: 'Ok. Show Log-in UI'
+
+    post:
+      operationId: R102
+      summary: 'R102: Login Action'
+      description: 'Processes the login form submission. Access: GST'
+      tags:
+        - 'M01: Authentication'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:         
+                  type: string
+                  format: email
+                password:   
+                  type: string
+                  format: password
+              required:
+                  - email
+                  - password
+      responses:
+        '302':
+          description: 'Redirect after processing the login credentials.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Successful authentication. Redirect to home page.'
+                  value: '/home'
+                302Error:
+                  description: 'Unsuccessful authentication. Redirect to login form.'
+                  value: '/login'
+
+  /logout:
+    get:
+      operationId: R103
+      summary: 'R103: Logout Action'
+      description: 'Logout the current authenticated user. Access: AUT'
+      tags:
+        - 'M01: Authentication'
+      responses:
+        '302':
+          description: 'Redirect after processing logout.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Successful logout. Redirect to login form.'
+                  value: '/login'
+
+  /register:
+    get:
+      operationId: R104
+      summary: 'R104: Register Form'
+      description: 'Provide new user registration form. Access: GST'
+      tags:
+        - 'M01: Authentication'
+      responses:
+        '200':
+          description: 'Ok. Show Sign-Up UI'
+    post:
+      operationId: R105
+      summary: 'R105: Register Action'
+      description: 'Processes the new user registration form submission. Access: GST'
+      tags:
+       - 'M01: Authentication'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                tagname:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                age:
+                  type: integer
+                country:
+                  type: string
+                degree:
+                  type: string
+              required:
+                - name
+                - tagname
+                - email
+                - password
+                - age
+      responses:
+        '302':
+          description: 'Redirect after processing the new user information.'
+          headers:
+             Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Successful authentication. Redirect to home page.'
+                  value: '/home'
+                302Failure:
+                  description: 'Failed authentication. Redirect to register form.'
+                  value: '/register'
+
+### M02 Users ###
+
+  /profile/{id}:
+    get:
+      operationId: R201
+      summary: 'R201: View User Profile'
+      description: 'Displays the profile of a specific user. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - in: path
+          name: id
+          required: false
+          schema:
+            type: integer
+          description: "The ID of the user whose profile to retrieve. If omitted, returns the profile of the authenticated user."
+      responses:
+        '200':
+          description: 'Ok! Show User Profile UI.'
+        '404':
+        description: "Profile not found for the given ID."
+
+  /user/edit-profile:
+    get:
+      operationId: R202
+      summary: 'R202: Edit User Profile'
+      description: 'Shows the edit profile page of the user. Access: AUT'
+      tags:
+        - 'M02: Users'
+      responses:
+        '200':
+          description: 'Success! You can now edit. Show edit profile UI.'
+        '401':
+          description: "Unauthorized. The user must be logged in to access the edit profile page."
+
+  /edit-profile/name/{id}:
+    post:
+      operationId: R203
+      summary: 'R203: Update User Name'
+      description: 'Updates the name of a user in their profile. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user whose name is being updated."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: "The updated name of the user."
+            required:
+              - name
+      responses:
+        '302':
+          description: 'Redirect after processing update name information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: '/edit-profile/{id}'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/edit-profile/{id}'
+        '400':
+          description: 'Validation error.'
+        '401':
+          description: 'Unauthorized. The user must be logged in to update their name.'
+        '404':
+          description: 'User not found for the provided ID.'
+
+  /edit-profile/tagname/{id}:
+    post:
+      operationId: R204
+      summary: 'R204: Update User Tagname'
+      description: 'Updates the tagname of a user in their profile. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user whose tagname is being updated."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+            type: object
+            properties:
+              tagname:
+                type: string
+                description: "The updated tagname of the user."
+            required:
+              - tagname
+      responses:
+        '302':
+          description: 'Redirect after processing update tagname information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: 'user/edit-profile'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/profile/edit'
+        '400':
+          description: 'Validation error.'
+        '401':
+          description: 'Unauthorized. The user must be logged in to update their tagname.'
+        '404':
+          description: 'User not found for the provided ID.'
+  
+  /edit-profile/email/{id}:
+    post:
+      operationId: R205
+      summary: 'R205: Update User Email'
+      description: 'Updates the email of a user in their profile. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user whose email is being updated."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+            type: object
+            properties:
+              old-email:
+                type: string
+                format: email
+                description: "The user's current email address for verification."
+              new-email:
+                type: string
+                format: email
+                description: "The new email address to update."
+              confirm-email:
+                type: string
+                format: email
+                description: "Confirmation of the new email address, must match `new-email`."
+            required:
+              - old-email
+              - new-email
+              - confirm-email
+      responses:
+        '302':
+          description: 'Redirect after processing update email information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: 'user/edit-profile'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/profile/edit'
+        '400':
+          description: 'Validation error.'
+        '401':
+          description: 'Unauthorized request.'
+        '404':
+          description: 'User not found for the provided ID.'
+  
+  /edit-profile/password/{id}:
+    post:
+      operationId: R206
+      summary: 'R206: Update user password.'
+      description: 'Update the user password. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user whose password is updated.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                old-password:
+                  type: string
+                  description: User's current password.
+                new-password:
+                  type: string
+                  description: New password value.
+                new-password_confirmation:
+                  type: string
+                  description: Confirmation of the new password.
+              required:
+                - old-password
+                - new-password
+                - new-password_confirmation
+      responses:
+        '302':
+          description: 'Redirect after processing update password information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: 'user/edit-profile'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/profile/edit'
+        '400':
+          description: 'Validation error or incorrect password.'
+        '401':
+          description: 'Unauthorized request.'
+        '404':
+          description: 'User not found for the provided ID.'
+
+  /edit-profile/age/{id}:
+    post:
+      operationId: R207
+      summary: 'R207: Update user age.'
+      description: 'Update the user age. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user whose age is updated.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                age:
+                  type: integer
+                  description: The new age for the user.
+              required:
+                - age
+      responses:
+        '302':
+          description: 'Redirect after processing update age information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: 'user/edit-profile'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/profile/edit'
+        '400':
+          description: 'Validation error.'
+        '401':
+          description: 'Unauthorized request.'
+        '404':
+          description: 'User not found for the provided ID.'
+
+  /edit-profile/country/{id}:
+    post:
+      operationId: R208
+      summary: 'R208: Update user country.'
+      description: 'Update the user country. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user whose country is updated.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                country:
+                  type: string
+                  description: The new country for the user.
+              required:
+                - country
+      responses:
+        '302':
+          description: 'Redirect after processing update country information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: 'user/edit-profile'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/profile/edit'
+        '400':
+          description: 'Validation error.'
+        '401':
+          description: 'Unauthorized request.'
+        '404':
+          description: 'User not found for the provided ID.'
+
+  /edit-profile/degree/{id}:
+    post:
+      operationId: R209
+      summary: 'R209: Update user degree.'
+      description: 'Update the user degree. Access: AUT'
+      tags:
+        - 'M02: Users'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user whose degree is updated.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                degree:
+                  type: string
+                  description: The new degree for the user.
+              required:
+                - degree
+      responses:
+        '302':
+          description: 'Redirect after processing update degree information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful update. Redirect to edit profile page.'
+                  value: 'user/edit-profile'
+                302Failure:
+                  description: 'Failed update. Redirect to edit profile page.'
+                  value: '/profile/edit'
+        '400':
+          description: 'Validation error.'
+        '401':
+          description: 'Unauthorized request.'
+        '404':
+          description: 'User not found for the provided ID.'  
+
+### M03 Posts ###
+  
+  /:
+    get:
+      operationId: R301
+      summary: 'Redirect to home page'
+      description: 'Redirects the url `/` to `/home`. Access: USR'
+      tags:
+        - 'M03: Posts'
+      responses:
+        '302':
+          description: 'Redirect to the `/home` page.'
+          headers:
+            Location:
+              description: 'The URL of the redirection target.'
+              schema:
+                type: string
+  
+  /home:
+    get:
+      operationId: R302
+      summary: 'R301: View user home page'
+      description: 'Show user home page. Access: USR'
+      tags:
+        - 'M03: Posts'
+      responses:
+        '200':
+          description: 'Success! Show the home page'
+
+  /questions/{id}:
+    get:
+      operationId: R303
+      summary: 'R303: View a specific question' 
+      description: 'Show a question, Access: USR'
+      tags:
+        - 'M03: Posts'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the question to retrieve.
+      responses:
+        '200':
+          description: 'Success! Show the question.'
+        '404':
+          description: 'Question not found.'
+        '403':
+          description: "You don't have access to the question."
+
+  /new-question:
+    get:
+      operationId: R304
+      summary: 'R304: Create a new question'
+      description: 'Provides the UI to create a new question. Access: AUT'
+      tags:
+        - 'M03: Posts'
+      responses:
+        '200':
+          description: 'Success! Show create question UI.'
+        '302':
+          description: 'Access to create question UI denied. Redirect to login form.'
+    post:
+      operationId: R305
+      summary: 'R305: Store a new question'
+      description: 'Stores a new question in the system. Access: AUT'
+      tags:
+        - 'M03: Posts'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'The title of the question.'
+                text:
+                  type: string
+                  description: 'The content of the question.'
+                tag:
+                  type: string
+                  description: 'The tag associated with the question.'
+              required:
+                - title
+                - text
+      responses:
+        '302':
+          description: 'Redirect after processing the new question information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Successful question create. Redirect to specific question view.'
+                  value: '/questions/{id}'
+                302Failure:
+                  description: 'Failed creation. Redirect back to the form.'
+                  value: '/new-question'
+        '400':
+          description: 'Validation error. Input data is invalid.'
+
+  /api/questions/{id}/delete:
+    post:
+      operationId: R306
+      summary: 'R306 : Delete Question'
+      description: 'Deletes a question from the system. Access: QA, ADM'
+      tags:
+        - 'M03: Posts'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: "The ID of the question post to delete."
+      responses:
+        '200':
+        description: "Question post deleted successfully."
+        '302':
+          description: "Redirect after question deletion. Redirects to the home page if the user was on the question page, or to the previous page."
+          headers:
+            Location:
+              schema:
+                type: string
+                examples:
+                  home:
+                    description: "Redirect to the home page."
+                    value: "/home"
+                  back:
+                    description: "Redirect back to the previous page."
+                    value: "/previous-page-url"
+          '401':
+            description: 'You are not authorized to perform this action.'
+          '404':
+            description: "The question post with the specified ID was not found."
+
+  /api/questions/{id}/edit:
+    post:
+      operationId: R307
+      summary: 'R307: Edit Question Action'
+      description: 'Edit post. Access: QA'
+      tags:
+        - 'M03: Posts'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the question to edit."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: "The updated content of the question."
+                title:
+                  type: string
+                  maxLength: 255
+                  description: "The updated title of the question. Must be unique."
+                tag_id:
+                  type: integer
+                  nullable: true
+                  description: "The ID of the associated tag. Optional."
+              required:
+                - text
+                - title
+      responses:
+        '200':
+          description: 'Question updated successfully.'
+        '400':
+          description: "Validation error. Input data is invalid."
+        '401':
+          description: 'You are not authorized to perform this action.'
+        '404':
+          description: 'Question not found for the provided ID.'
+
+  /questions/{id}/answers:
+    post:
+      operationId: R308
+      summary: "R308: Create an answer"
+      description: "Post a new answer to a specific question. Access: AUT"
+      tags:
+        - "M03: Posts"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the question for which the answer is being created."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                newAnswer:
+                  type: string
+                  description: "The content of the new answer."
+              required:
+                - newAnswer
+      responses:
+        '201':
+          description: "Answer created successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Answer created successfully."
+                  redirect:
+                    type: string
+                    example: "/questions/{id}"
+        '400':
+          description: "Validation error."
+        '401':
+          description: "Unauthorized. User does not have permission to create an answer for the question."
+        '404':
+          description: "Question not found."
+
+  /answers/{id}:
+  post:
+    operationId: R309
+    summary: "R309: Delete an answer"
+    description: "Delete a specific answer. Access: AA, ADM"
+    tags:
+      - "M03: Posts"
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: "The ID of the answer to delete."
+    responses:
+      '200':
+        description: "Answer deleted successfully."
+      '401':
+        description: "Unauthorized. User does not have permission to delete the answer."
+      '404':
+        description: "The answer was not found."
+      
+  /api/answers/{id}/edit:
+    post:
+      operationId: R310
+      summary: "R310: Edit an answer"
+      description: "Edit a specific answer. Access: AA"
+      tags:
+        - "M03: Posts"
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: "The ID of the answer to edit."
+      requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              text:
+                type: string
+                maxLength: 5000
+                description: "The updated content of the answer."
+            required:
+              - text
+      responses:
+        '200':
+          description: "Answer edited successfully."
+        '400':
+          description: "Validation error. Input data is invalid."
+        '401':
+          description: "Unauthorized. User does not have permission to update the answer."
+        '404':
+          description: "Answer not found."
+
+  /question/{questionId}/answer/delete: 
+    post:
+      operationId: R311
+      summary: "R311: Delete an answer"
+      description: "Delete a specific answer for a question. Access: USR, ADM"
+      tags:
+        - "M03: Posts"
+      responses:
+        '200':
+          description: "Answer deleted successfully"
+        '403':
+          description: "Forbidden action"
+
+  /api/home/{section}/edit:
+    get:
+      operationId: "R312"
+      summary: "R312: Render a specific section of questions. Access: AUT"
+      description: "Fetches and returns JSON with html for a specific section of questions based on the section type (new, trending, foryou)."
+      tags:
+        - "M03: Posts"
+      parameters:
+        - name: section
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: ["new", "trending", "foryou"]
+          description: "The section to fetch questions from. Valid values are 'new', 'trending', or 'foryou'."
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: "The page number for paginated results. Has a default value of 1."
+      responses:
+        '200':
+          description: "Success! HTML returned for the requested section."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  html:
+                    type: string
+                    description: "HTML content for the requested section."
+        '400':
+          description: "Invalid section provided."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message."
+
+  /api/questions/{id}/answers/{page}:
+    get:
+      operationId: "R313"
+      summary: "R313: Get paginated answers for a question. Access: USR"
+      description: "Gets JSON with the html to render a list of answers for a given question with pagination."
+      tags:
+        - "M03: Posts"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "ID of the question for which answers are being retrieved."
+        - name: page
+          in: path
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: "The page number for paginated results."
+      responses:
+        '200':
+          description: "Success! Answers retrieved."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: "HTML content for each answer."
+        '404':
+          description: "The question was not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "There is no question with provided ID."
+
+  /api/tags:
+    get:
+      operationId: "R314"
+      summary: "R314: Gets all tags"
+      description: "Gets a JSON of all tags. Access: USR"
+      tags:
+        - "M03: Posts"
+      responses:
+        '200':
+          description: "Success!"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                example:
+                  - id: 1
+                    name: "Programming"
+                  - id: 2
+                    name: "Networking"
+        '403':
+          description: "Unauthorized access to view tags."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '302':
+          description: "Redirect to home when unauthorized."
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "/home"
+        
+### M04 Administration ###
+
+  /admin-center:
+    get:
+      operationId: R401
+      summary: 'R401: View Admin Page'
+      description: 'Show admin page UI, Access: ADM'
+      tags:
+        - 'M04: Administration'
+
+      responses:
+        '200':
+          description: 'OK. Show the admin page UI'
+        '403':
+          description: 'This action is unauthorized.'
+
+  /api/admin-center/ban/{id}:
+    post:
+      operationId: R402
+      summary: 'R402: Ban user from logging in action'
+      description: 'Ban user. Access: ADM'
+      tags:
+        - 'M04: Administration'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to be banned.
+      responses:
+        '200':
+          description: 'Success! User banned.'
+        '401':
+          description: 'Unauthorized! You cannot ban this user!'
+
+  /api/admin-center/revoke-ban/{id}:
+    post:
+      operationId: R403
+      summary: 'R403: Revoking ban on user logging in action'
+      description: 'Revoke user ban. Access: ADM'
+      tags:
+        - 'M04: Administration'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to revoke the ban.
+      responses:
+        '200':
+          description: 'User banning has been revoked successfully.'
+        '401':
+          description: 'Unauthorized! You cannot revoke this user ban.'
+
+  /api/admin-center/moderator/{id}:
+    post:
+      operationId: R404
+      summary: 'R404: Promoting user to moderator role'
+      description: 'Promote user to moderator. Access: ADM'
+      tags:
+        - 'M04: Administration'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to be promoted to moderator.
+      responses:
+        '200':
+          description: 'User has been promoted to moderator successfully.'
+        '401':
+          description: 'Unauthorized! You cannot revoke this user ban.'
+
+
+  /api/admin-center/remove-moderator/{id}:
+    post:
+      operationId: R405
+      summary: 'R405: Remove user from moderator role'
+      description: 'Remove user from moderator. Access: ADM'
+      tags:
+        - 'M04: Administration'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to be removed from moderator.
+      responses:
+        '200':
+          description: 'User permissions as moderator have been removed successfully.'
+        '401':
+          description: 'Unauthorized! You cannot revoke this user ban.'
+
+  /api/admin-center/actions/{id}/edit:
+    get:
+      operationId: R406
+      summary: 'R406: Dropdown of admin actions for user'
+      description: 'Gets a json response of html code with the dropdown of admin actions available for a user. Access: ADM'
+      tags:
+        - 'M04: Administration'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to get the dropdown actions.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    html:
+                      type: string
+
+  /api/users:
+    get:
+      operationId: R209
+      summary: 'R209: Retrieve a list of users.'
+      description: 'Retrieve JSON with the html to render all users in the system. Access: ADM'
+      tags:
+        - 'M04: Administration'
+      parameters:
+        - in: query
+          name: page
+          required: false
+          description: The page number for pagination.
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: search
+          required: false
+          description: The seatch value to filter users by tagname.
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of users rendered as HTML.
+          content:
+            application/json:
+              schema:
+                type: string
